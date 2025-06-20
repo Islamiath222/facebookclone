@@ -2,29 +2,31 @@
 session_start();
 include 'db.php';
 
-// Get form data safely
-$email = $_POST['username']; // input name="username" used for email
-$password = $_POST['password'];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $email = $_POST['username'];
+    $password = $_POST['password'];
 
-// Query to check user
-$sql = "SELECT * FROM users2 WHERE email = '$email'";
-$result = $conn->query($sql);
+    $sql = "SELECT * FROM users2 WHERE email = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
 
-if ($result && $result->num_rows === 1) {
-    $user = $result->fetch_assoc();
+    $result = $stmt->get_result();
+    if ($result && $result->num_rows === 1) {
+        $user = $result->fetch_assoc();
 
-    // Verify password
-    if (password_verify($password, $user['password'])) {
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['first_name'] = $user['first_name'];
-
-        // ✅ Redirect to Dashboard
-        header("Location: Dashboard.php");
-        exit();
+        if (password_verify($password, $user['password'])) {
+            $_SESSION['email'] = $user['email'];
+            $_SESSION['first_name'] = $user['first_name'];
+            header("Location: dashboard.php");
+            exit();
+        } else {
+            echo "❌ Incorrect password.";
+        }
     } else {
-        echo "Incorrect password.";
+        echo "❌ User not found.";
     }
 } else {
-    echo "User not found.";
+    echo "No form data received.";
 }
 ?>
