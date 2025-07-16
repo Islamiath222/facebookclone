@@ -302,7 +302,7 @@
         </button>
       </div>
       <!-- Hidden file input -->
-<input type="file" id="fileInput" accept="image/*,video/*" style="display:none" />
+<input type="file" id="fileInput" accept="image/,video/" style="display:none" />
 
 <!-- Compose box fixed on left, hidden initially -->
 <div id="composeBox" style="display:none; position: fixed; top: 80px; left: 16px; width: 320px; background: white; box-shadow: 0 4px 24px rgba(0,0,0,0.12); border-radius: 12px; padding: 16px; z-index: 1000; flex-direction: column;">
@@ -340,9 +340,9 @@
   
   <script>
     // When clicking photo story card, open file dialog directly
-    document.getElementById('photoStoryBtn').onclick = function() {
-      document.getElementById('fileInput').click();
-    };
+    // document.getElementById('photoStoryBtn').onclick = function() {
+    //   document.getElementById('fileInput').click();
+    // };
 
     // When clicking text story card, open text modal as before
     document.getElementById('textStoryBtn').onclick = function() {
@@ -412,8 +412,12 @@ fileInput.addEventListener('change', () => {
   if (!file) return;
 
   if (file.type.startsWith('image/')) {
-    previewMedia.src = URL.createObjectURL(file);
-  } else if (file.type.startsWith('video/')) {
+     const reader = new FileReader();
+  reader.onload = function(e) {
+    previewMedia.src = e.target.result; // base64 string
+  };
+  reader.readAsDataURL(file);
+} else if (file.type.startsWith('video/')) {
     // For simplicity, just show an image placeholder or handle video preview if you want
     previewMedia.src = ''; // Or a video preview element if you implement it
     alert('Video preview not implemented yet.');
